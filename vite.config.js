@@ -1,37 +1,20 @@
-import { fileURLToPath, URL } from 'node:url'
-import path from 'path'
-
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import vueDevTools from 'vite-plugin-vue-devtools'
+import { resolve } from 'path'
 
-// https://vitejs.dev/config/
 export default defineConfig({
-  base: './',
-  plugins: [
-    vue(),
-    vueDevTools(),
-  ],
+  plugins: [vue()],
+  base: '/',
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src')
+      '@': resolve(__dirname, 'src'),
     },
-  },
-  server: {
-    port: 3000,
-    open: true,
-    cors: true,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '')
-      }
-    }
   },
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
+    sourcemap: false,
+    chunkSizeWarningLimit: 1500,
     minify: 'terser',
     terserOptions: {
       compress: {
@@ -41,10 +24,26 @@ export default defineConfig({
     },
     rollupOptions: {
       output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia'],
+          'arco': ['@arco-design/web-vue'],
+          'echarts': ['echarts']
+        },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
     }
-  }
-})
+  },
+  server: {
+    port: 3000,
+    open: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:8080',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  },
+}) 

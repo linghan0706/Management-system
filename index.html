@@ -1,10 +1,19 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh-CN">
   <head>
     <meta charset="UTF-8">
     <link rel="icon" href="/favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vite App</title>
+    <meta name="description" content="Lin Admin - 现代化的后台管理系统">
+    <meta name="theme-color" content="#165DFF">
+    <title>Lin Admin</title>
+    <script>
+      // 错误处理
+      window.onerror = function(msg, url, lineNo, columnNo, error) {
+        console.error('Error: ' + msg + '\nURL: ' + url + '\nLine: ' + lineNo + '\nColumn: ' + columnNo + '\nError object: ' + JSON.stringify(error));
+        return false;
+      };
+    </script>
   </head>
   <body>
     <div id="app"></div>

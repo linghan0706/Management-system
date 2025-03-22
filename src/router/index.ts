@@ -156,10 +156,23 @@ router.beforeEach((to, from, next) => {
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - Lin Admin` : 'Lin Admin'
   
+  // 检查是否在Netlify环境
+  const isNetlify = window.location.hostname.includes('netlify.app')
+  
   // 简单的身份验证逻辑
   const token = localStorage.getItem('token')
   
-  if (to.meta.requiresAuth !== false && !token) {
+  // 如果是Netlify环境且没有token，设置访客token
+  if (isNetlify && !token) {
+    localStorage.setItem('token', 'visitor-token')
+    localStorage.setItem('userInfo', JSON.stringify({
+      name: '访客',
+      avatar: '',
+      roles: ['visitor']
+    }))
+  }
+  
+  if (to.meta.requiresAuth !== false && !token && !isNetlify) {
     next('/login')
   } else {
     next()
