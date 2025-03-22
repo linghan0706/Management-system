@@ -90,6 +90,28 @@ onMounted(() => {
   if (route.path === '/') {
     router.push('/dashboard')
   }
+  
+  // 检查token和用户信息
+  const token = localStorage.getItem('token')
+  
+  // 在Netlify环境中，如果没有token，可以设置一个默认的访客token
+  const isNetlify = window.location.hostname.includes('netlify.app');
+  if (!token && isNetlify) {
+    // 为Netlify部署设置临时访客token
+    localStorage.setItem('token', 'visitor-token');
+    localStorage.setItem('userInfo', JSON.stringify({
+      name: '访客',
+      avatar: '',
+      roles: ['visitor']
+    }));
+    return;
+  }
+  
+  // 本地开发环境的原有逻辑
+  if (!token) {
+    window.location.href = '/login';
+    return;
+  }
 })
 
 onBeforeUnmount(() => {
@@ -565,8 +587,9 @@ router.beforeEach((to, from, next) => {
   
   // 简单的身份验证逻辑
   const token = localStorage.getItem('token')
+  const isNetlify = window.location.hostname.includes('netlify.app');
   
-  if (to.meta.requiresAuth !== false && !token) {
+  if (to.meta.requiresAuth !== false && !token && !isNetlify) {
     next('/login')
   } else {
     next()
