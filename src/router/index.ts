@@ -153,17 +153,22 @@ const router = createRouter({
 
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
+  console.log(`路由导航: ${from.path} -> ${to.path}`);
+  
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - Lin Admin` : 'Lin Admin'
   
   // 检查是否在Netlify环境
   const isNetlify = window.location.hostname.includes('netlify.app')
+  console.log('路由守卫: 是否Netlify环境', isNetlify);
   
   // 简单的身份验证逻辑
   const token = localStorage.getItem('token')
+  console.log('路由守卫: 是否有token', !!token);
   
   // 如果是Netlify环境且没有token，设置访客token
   if (isNetlify && !token) {
+    console.log('路由守卫: 在Netlify环境中设置访客身份');
     localStorage.setItem('token', 'visitor-token')
     localStorage.setItem('userInfo', JSON.stringify({
       name: '访客',
@@ -172,10 +177,13 @@ router.beforeEach((to, from, next) => {
     }))
   }
   
-  if (to.meta.requiresAuth !== false && !token && !isNetlify) {
-    next('/login')
-  } else {
+  // 简化认证逻辑：Netlify环境下或已登录用户，允许访问
+  if (to.meta.requiresAuth === false || token || isNetlify) {
+    console.log('路由守卫: 允许访问', to.path);
     next()
+  } else {
+    console.log('路由守卫: 重定向到登录页');
+    next('/login')
   }
 })
 

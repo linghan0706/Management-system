@@ -19,11 +19,11 @@ import './mock'
 
 console.log('应用初始化开始...')
 
-// 检查是否在Netlify环境
+// 检测是否在Netlify环境中
 const isNetlify = window.location.hostname.includes('netlify.app')
-console.log('是否在Netlify环境:', isNetlify)
+console.log('是否Netlify环境:', isNetlify)
 
-// 如果是Netlify环境，设置默认的访客信息
+// 如果是Netlify环境，设置默认访客身份
 if (isNetlify && !localStorage.getItem('token')) {
   console.log('在Netlify环境中设置访客身份')
   localStorage.setItem('token', 'visitor-token')
@@ -33,6 +33,17 @@ if (isNetlify && !localStorage.getItem('token')) {
     roles: ['visitor']
   }))
 }
+
+// 添加全局错误处理
+window.onerror = function(message, source, lineno, colno, error) {
+  console.error('全局错误:', { message, source, lineno, colno, error })
+  return false
+}
+
+// 避免初始化过程中的路由错误
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('DOM加载完成')
+})
 
 console.log('创建Vue应用实例')
 const app = createApp(App)
