@@ -8,14 +8,14 @@
               <icon-plus />
             </template>
             新增
-          </a-button>
-          <a-button status="success">
+          </a-button> 
+          <a-button status="success" @click="handleBatchStart">
             <template #icon>
               <icon-play-circle />
             </template>
             启动所选
-          </a-button>
-          <a-button status="danger">
+           </a-button>
+          <a-button status="danger" @click="handleBatchPause">
             <template #icon>
               <icon-pause-circle />
             </template>
@@ -405,4 +405,68 @@ const refreshData = () => {
   }
 }
 
-// 组件挂载
+// 批量启动任务
+const handleBatchStart = () => {
+  const selectedTasks = tableData.value.filter((item: any) => item.selected)
+  if (selectedTasks.length === 0) {
+    Message.warning('请至少选择一个任务')
+    return
+  }
+  
+  Modal.confirm({
+    title: '确认批量启动',
+    content: `确定要启动已选择的 ${selectedTasks.length} 个任务吗？`,
+    onOk: () => {
+      // 模拟API调用
+      setTimeout(() => {
+        selectedTasks.forEach((task: any) => {
+          task.status = '0'
+        })
+        Message.success(`已成功启动 ${selectedTasks.length} 个任务`)
+      }, 500)
+    }
+  })
+}
+
+// 批量暂停任务
+const handleBatchPause = () => {
+  const selectedTasks = tableData.value.filter((item: any) => item.selected)
+  if (selectedTasks.length === 0) {
+    Message.warning('请至少选择一个任务')
+    return
+  }
+  
+  Modal.confirm({
+    title: '确认批量暂停',
+    content: `确定要暂停已选择的 ${selectedTasks.length} 个任务吗？`,
+    onOk: () => {
+      // 模拟API调用
+      setTimeout(() => {
+        selectedTasks.forEach((task: any) => {
+          task.status = '1'
+        })
+        Message.success(`已成功暂停 ${selectedTasks.length} 个任务`)
+      }, 500)
+    }
+  })
+}
+
+</script>
+
+<style scoped>
+.scheduled-task-container {
+  padding: 16px;
+}
+
+.scheduled-task-card {
+  margin-bottom: 16px;
+}
+
+.search-form {
+  margin-bottom: 16px;
+}
+
+.task-table {
+  margin-top: 8px;
+}
+</style>
