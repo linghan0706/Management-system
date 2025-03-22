@@ -39,6 +39,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
+      external: ['@arco-design/web-vue'],
       output: {
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
