@@ -54,9 +54,8 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
-import { IconUser } from '@arco-design/web-vue/es/icon'
-import { IconTeam } from '@arco-design/web-vue/es/icon/icon-team'
-import { IconMenu, IconApartment, IconSettings } from '@arco-design/web-vue/es/icon'
+import { IconUser, IconMenu, IconSettings } from '@arco-design/web-vue/es/icon'
+import { IconTeam, IconApartment } from '@/components/icons'
 
 const router = useRouter()
 

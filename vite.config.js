@@ -13,20 +13,24 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
-    sourcemap: false,
+    sourcemap: true,
     chunkSizeWarningLimit: 1500,
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true,
-        drop_debugger: true
+        drop_console: false,
+        drop_debugger: false
       }
     },
     rollupOptions: {
+      external: [
+        // Rollup无法解析的模块
+      ],
       output: {
         manualChunks: {
-          'vendor': ['vue', 'vue-router', 'pinia'],
+          'vendor': ['vue', 'vue-router', 'pinia', 'axios'],
           'arco': ['@arco-design/web-vue'],
+          'icons': ['./src/components/icons/index.js'],
           'echarts': ['echarts']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
@@ -34,6 +38,9 @@ export default defineConfig({
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'
       }
     }
+  },
+  optimizeDeps: {
+    include: ['@arco-design/web-vue/es/icon/*']
   },
   server: {
     port: 3000,

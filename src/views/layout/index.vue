@@ -104,12 +104,15 @@ onMounted(() => {
       avatar: '',
       roles: ['visitor']
     }));
+    console.log('已设置访客token');
     return;
   }
   
-  // 本地开发环境的原有逻辑
+  // 本地开发环境的认证逻辑
   if (!token) {
-    window.location.href = '/login';
+    console.log('未检测到token，正在重定向到登录页面');
+    // 使用Vue Router重定向，而不是硬刷新页面
+    router.push('/login');
     return;
   }
 })
