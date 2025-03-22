@@ -207,53 +207,132 @@ const refreshCurrentPage = () => {
   router.replace('/redirect' + currentPath)
 }
 
-// 处理菜单点击
-const handleMenuClick = (key: string) => {
-  if (key === route.path.substring(1)) return
+// 当前激活的菜单
+const activeMenu = computed(() => {
+  const path = route.path
+  // 确保首页路径能正确高亮
+  if (path === '/' || path === '/dashboard') return 'item-Dashboard'
   
-  // 查找对应的菜单项以获取标题
-  let title = ''
-  const findMenuItem = (items: any[]) => {
+  // 移除开头的斜杠
+  const trimmedPath = path.startsWith('/') ? path.substring(1) : path
+  
+  // 查找当前路径匹配的菜单项
+  const findMatchingMenuKey = (items: any[]): string | null => {
     for (const item of items) {
-      if (item.key === key) {
-        title = item.title || key
-        return true
+      // 检查主菜单项
+      if (item.path && (
+        `/${item.path}` === path || 
+        item.path === trimmedPath ||
+        item.path === path
+      )) {
+        return `item-${item.name}`;
       }
-      if (item.children?.length) {
-        if (findMenuItem(item.children)) {
-          return true
+      
+      // 检查子菜单项
+      if (item.children && item.children.length) {
+        for (const child of item.children) {
+          if (child.path && (
+            child.path === trimmedPath ||
+            `/${child.path}` === path ||
+            child.path === path ||
+            `${item.path}/${child.path.replace('/', '')}` === trimmedPath
+          )) {
+            return child.path.replace('/', '');
+          }
         }
       }
     }
-    return false
+    return null;
   }
   
-  // 查找所有菜单项获取标题
-  for (const item of menuList.value) {
-    if (item.name === key) {
-      title = item.title
-      break
-    }
-    if (item.children?.length) {
-      if (findMenuItem(item.children)) {
-        break
-      }
-    }
+  const menuKey = findMatchingMenuKey(menuList.value);
+  if (menuKey) {
+    return menuKey;
   }
+  
+  // 兜底逻辑：如果是子菜单项，则返回完整路径作为key
+  if (trimmedPath.includes('/')) {
+    return trimmedPath;
+  }
+  
+  // 如果是主菜单项，使用item-前缀和首字母大写的路径
+  return `item-${trimmedPath.charAt(0).toUpperCase() + trimmedPath.slice(1)}`;
+})
+
+// 监听activeMenu变化，用于调试
+watch(() => activeMenu.value, (newVal) => {
+  console.log('当前激活菜单项:', newVal)
+})
+
+// 监听路由变化，打印调试信息
+watch(() => route.path, (newPath) => {
+  console.log('路由变化:', {
+    path: newPath,
+    activeMenu: activeMenu.value,
+    menuList: menuList.value,
+    selectedKeys: [activeMenu.value]
+  });
+}, { immediate: true })
+
+// 处理菜单项点击
+const handleMenuItemClick = (key: string) => {
+  console.log('点击菜单项:', key);
+  let path = key;
+  
+  // 如果key是以item-开头的格式，需要转换
+  if (key.startsWith('item-')) {
+    path = key.replace('item-', '').toLowerCase();
+  }
+  
+  // 如果点击的是当前路径，不做处理
+  if (path.toLowerCase() === route.path.substring(1).toLowerCase()) {
+    console.log('已在当前路径:', path);
+    return;
+  }
+  
+  // 构建完整的路径
+  const fullPath = path.startsWith('/') ? path : `/${path}`;
+  console.log('导航到:', fullPath);
+  
+  // 查找对应菜单项的标题
+  let title = getMenuTitle(path);
   
   // 添加标签页并导航
-  addTab('/' + key, title || key)
-  router.push(`/${key}`)
-}
-
-// 处理菜单项点击 (优化后的方法)
-const handleMenuItemClick = (key: string) => {
-  handleMenuClick(key)
+  addTab(fullPath, title || path);
+  router.push(fullPath);
   
   // 如果在移动端，点击菜单项后关闭抽屉
   if (isMobile.value) {
-    drawerVisible.value = false
+    drawerVisible.value = false;
   }
+}
+
+// 根据路径获取菜单标题
+const getMenuTitle = (path: string): string => {
+  const simplePath = path.startsWith('/') ? path.substring(1) : path
+  
+  // 在菜单列表中查找匹配的菜单项
+  const findInMenuList = (list: any[]): string => {
+    for (const item of list) {
+      // 检查主菜单项
+      if (item.path && (
+          item.path === simplePath || 
+          item.path === `/${simplePath}` ||
+          item.name.toLowerCase() === simplePath.toLowerCase()
+      )) {
+        return item.title || ''
+      }
+      
+      // 检查子菜单项
+      if (item.children && item.children.length) {
+        const childMatch = findInMenuList(item.children)
+        if (childMatch) return childMatch
+      }
+    }
+    return ''
+  }
+  
+  return findInMenuList(menuList.value)
 }
 
 // 切换侧边栏
@@ -381,24 +460,6 @@ const toggleFullscreen = () => {
   }
 }
 
-// 当前激活的菜单
-const activeMenu = computed(() => {
-  const path = route.path
-  // 确保首页路径能正确高亮
-  if (path === '/' || path === '/dashboard') return 'item-Dashboard'
-  
-  // 移除开头的斜杠
-  const trimmedPath = path.startsWith('/') ? path.substring(1) : path
-  
-  // 如果是子菜单项
-  if (trimmedPath.includes('/')) {
-    return trimmedPath
-  }
-  
-  // 如果是主菜单项
-  return `item-${trimmedPath.charAt(0).toUpperCase() + trimmedPath.slice(1)}`
-})
-
 // 默认展开的子菜单
 const openKeys = computed(() => {
   const path = route.path
@@ -491,7 +552,9 @@ const getIconComponent = (iconName: string | undefined) => {
 
 // 处理移动端菜单项点击
 const handleMobileMenuItemClick = (key: string) => {
+  // 调用相同的处理函数，保持逻辑一致
   handleMenuItemClick(key)
+  // 关闭抽屉（此逻辑已包含在handleMenuItemClick中，这里保留是为了确保兼容性）
   drawerVisible.value = false
 }
 
@@ -807,13 +870,35 @@ $transition-duration: 0.3s;
     }
     
     :deep(.arco-menu) {
+      // 在折叠状态下确保图标居中
+      &.arco-menu-collapsed {
+        .arco-menu-item, .arco-menu-inline-header {
+          padding: 5px !important;
+          
+          .arco-menu-item-inner, .arco-menu-inline-header-title {
+            justify-content: center !important;
+            padding: 0 !important;
+            
+            .arco-icon {
+              margin-left: 11px !important;
+              font-size: 20px;
+            }
+          }
+        }
+      }
+      
       .arco-menu-selected {
-        background-color: rgba(var(--primary-6), 0.1);
-        border-right: 3px solid rgb(var(--primary-6));
+        background-color: rgba(var(--primary-6), 0.08);
+        border-right: none;
         
         .arco-menu-item-inner {
-          font-weight: bold;
+          font-weight: 500;
           color: rgb(var(--primary-6));
+          
+          span {
+            color: rgb(var(--primary-6)) !important;
+            font-weight: 500;
+          }
           
           .arco-icon {
             color: rgb(var(--primary-6));
@@ -822,34 +907,121 @@ $transition-duration: 0.3s;
       }
       
       .arco-menu-item {
+        margin: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        
         &:hover {
           background-color: rgba(var(--primary-6), 0.05);
-        }
-        
-        &.arco-menu-selected {
-          background-color: rgba(var(--primary-6), 0.1);
-          border-right: 3px solid rgb(var(--primary-6));
-          color: rgb(var(--primary-6));
-          font-weight: bold;
+          transform: translateX(4px);
           
-          .arco-icon {
+          .arco-menu-item-inner {
             color: rgb(var(--primary-6));
-          }
-        }
-      }
-      
-      .arco-menu-inline-header {
-        &.arco-menu-selected {
-          background-color: transparent;
-          .arco-menu-inline-header-title {
-            color: rgb(var(--primary-6));
-            font-weight: bold;
+            
+            span {
+              color: rgb(var(--primary-6));
+            }
             
             .arco-icon {
               color: rgb(var(--primary-6));
             }
           }
         }
+        
+        &.arco-menu-selected {
+          background-color: rgba(var(--primary-6), 0.08);
+          border-right: none;
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: rgb(var(--primary-6));
+            border-radius: 2px 0 0 2px;
+          }
+          
+          .arco-menu-item-inner {
+            justify-content: center;
+            color: rgb(var(--primary-6));
+            font-weight: 500;
+            
+            span, a {
+              color: rgb(var(--primary-6)) !important;
+              font-weight: 500;
+            }
+            
+            .arco-icon {
+              color: rgb(var(--primary-6));
+            }
+          }
+        }
+        
+        &:active::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(var(--primary-6), 0.12);
+          border-radius: 4px;
+          animation: ripple 0.4s linear;
+        }
+        
+        .arco-menu-item-inner {
+          justify-content: center;
+          transition: all 0.25s ease;
+          
+          .arco-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            transition: all 0.25s ease;
+          }
+          
+          span, a {
+            transition: all 0.25s ease;
+          }
+        }
+      }
+      
+      /* 子菜单标题项选中样式 */
+      .arco-menu-inline-header {
+        &.arco-menu-selected {
+          .arco-menu-inline-header-title {
+            color: rgb(var(--primary-6));
+            font-weight: 500;
+            
+            span, a {
+              color: rgb(var(--primary-6)) !important;
+              font-weight: 500;
+            }
+            
+            .arco-icon {
+              color: rgb(var(--primary-6));
+            }
+          }
+        }
+        
+        &:hover {
+          .arco-menu-inline-header-title {
+            color: rgb(var(--primary-6));
+            
+            span, a {
+              color: rgb(var(--primary-6));
+            }
+            
+            .arco-icon {
+              color: rgb(var(--primary-6));
+            }
+          }
+        }
+      }
+      
+      /* 确保所有文本元素都有过渡效果 */
+      * {
+        transition: color 0.3s ease;
       }
     }
   }
@@ -893,16 +1065,36 @@ $transition-duration: 0.3s;
     }
     
     :deep(.arco-menu) {
-      text-align: center;
+      // 移动端折叠菜单图标居中样式
+      &.arco-menu-collapsed {
+        .arco-menu-item, .arco-menu-inline-header {
+          padding: 0 !important;
+          
+          .arco-menu-item-inner, .arco-menu-inline-header-title {
+            justify-content: center !important;
+            padding: 0 !important;
+            
+            .arco-icon {
+              margin-right: 0 !important;
+              font-size: 20px;
+            }
+          }
+        }
+      }
       
       .arco-menu-selected {
-        background-color: rgba(var(--primary-6), 0.1);
-        border-right: 3px solid rgb(var(--primary-6));
+        background-color: rgba(var(--primary-6), 0.08);
+        border-right: none;
         
         .arco-menu-item-inner {
-          font-weight: bold;
+          font-weight: 500;
           color: rgb(var(--primary-6));
           justify-content: center;
+          
+          span, a {
+            color: rgb(var(--primary-6)) !important;
+            font-weight: 500;
+          }
           
           .arco-icon {
             color: rgb(var(--primary-6));
@@ -912,25 +1104,41 @@ $transition-duration: 0.3s;
       
       .arco-menu-item {
         text-align: center;
+        margin: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
         
         &:hover {
           background-color: rgba(var(--primary-6), 0.05);
+          transform: translateX(4px);
         }
-        
-        .arco-menu-item-inner {
-          justify-content: center;
-        }
-      }
-      
-      .arco-menu-inline-header {
-        text-align: center;
         
         &.arco-menu-selected {
-          background-color: transparent;
-          .arco-menu-inline-header-title {
-            color: rgb(var(--primary-6));
-            font-weight: bold;
+          background-color: rgba(var(--primary-6), 0.08);
+          border-right: none;
+          position: relative;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background-color: rgb(var(--primary-6));
+            border-radius: 2px 0 0 2px;
+          }
+          
+          .arco-menu-item-inner {
             justify-content: center;
+            color: rgb(var(--primary-6));
+            font-weight: 500;
+            
+            span, a {
+              color: rgb(var(--primary-6)) !important;
+              font-weight: 500;
+            }
             
             .arco-icon {
               color: rgb(var(--primary-6));
@@ -938,8 +1146,65 @@ $transition-duration: 0.3s;
           }
         }
         
+        &:active::after {
+          content: "";
+          position: absolute;
+          inset: 0;
+          background: rgba(var(--primary-6), 0.12);
+          border-radius: 4px;
+          animation: ripple 0.4s linear;
+        }
+        
+        .arco-menu-item-inner {
+          justify-content: center;
+          
+          .arco-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            transition: all 0.25s ease;
+          }
+        }
+      }
+      
+      .arco-menu-inline-header {
+        text-align: center;
+        margin: 4px 8px;
+        border-radius: 4px;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        
+        &:hover {
+          background-color: rgba(var(--primary-6), 0.08);
+          transform: translateX(4px);
+        }
+        
+        &.arco-menu-selected {
+          background-color: rgba(var(--primary-6), 0.08);
+          
+          .arco-menu-inline-header-title {
+            color: rgb(var(--primary-6));
+            font-weight: 500;
+            justify-content: center;
+            
+            span, a {
+              color: rgb(var(--primary-6)) !important;
+              font-weight: 500;
+            }
+            
+            .arco-icon {
+              color: rgb(var(--primary-6));
+              font-size: 18px;
+            }
+          }
+        }
+        
         .arco-menu-inline-header-title {
           justify-content: center;
+          
+          .arco-icon {
+            font-size: 18px;
+            margin-right: 10px;
+            transition: all 0.25s ease;
+          }
         }
       }
     }
