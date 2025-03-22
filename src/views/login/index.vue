@@ -52,8 +52,8 @@ const handleSubmit = async () => {
       Message.success('登录成功')
       console.log('准备跳转到首页')
       
-      // 使用window.location直接跳转，绕过路由
-      window.location.href = '/'
+      // 使用Vue Router进行路由跳转
+      router.push('/')
     } catch (error: any) {
       console.error('登录API错误:', error)
       Message.error(error.message || '登录失败，请检查用户名和密码')
@@ -236,4 +236,4 @@ const handleSubmit = async () => {
     }
   }
 }
-</style> 
+</style>

@@ -6,7 +6,7 @@ import { Message, Modal } from '@arco-design/web-vue'
 const systemForm = reactive({
   siteName: 'Lin Admin系统',
   logo: '@/assets/images/logo.svg',
-  copyright: '© 2023 Lin Admin. All Rights Reserved.',
+  copyright: '© 2025 Lin Admin. All Rights Reserved.',
   recordNumber: '粤ICP备12345678号',
   allowRegister: true,
   registerReview: false,
