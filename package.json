@@ -5,6 +5,10 @@
   "description": "Lin Admin - 现代化的后台管理系统",
   "author": "XHan Team",
   "type": "module",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "run-p type-check \"build-only {@}\" --",
