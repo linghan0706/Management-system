@@ -16,7 +16,7 @@ const goHome = () => {
   <div class="error-container">
     <div class="error-content">
       <div class="error-image">
-        <img src="../../assets/images/404.svg" alt="404" />
+        <img src="@/assets/images/404.svg" alt="404" />
       </div>
       <h1 class="error-title">404</h1>
       <p class="error-desc">抱歉，您访问的页面不存在</p>
@@ -96,4 +96,4 @@ const goHome = () => {
     }
   }
 }
-</style> 
+</style>

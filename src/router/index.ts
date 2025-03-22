@@ -54,8 +54,16 @@ const routes: Array<RouteRecordRaw> = [
           {
             path: 'config',
             name: 'Config',
-            component: () => import('@/views/system/config/system-config.vue'),
-            meta: { title: '系统设置', icon: 'setting', keepAlive: true }
+            component: () => import('@/views/system/config/index.vue'),
+            meta: { title: '系统设置', icon: 'setting', keepAlive: true },
+            children: [
+              {
+                path: 'system-config',
+                name: 'SystemConfig',
+                component: () => import('@/views/system/config/system-config.vue'),
+                meta: { title: '系统设置详情', icon: 'setting', keepAlive: true }
+              }
+            ]
           }
         ]
       },
@@ -88,47 +96,36 @@ const routes: Array<RouteRecordRaw> = [
             name: 'Log',
             component: () => import('@/views/monitor/log/operation-log.vue'),
             meta: { title: '操作日志', icon: 'file-text', keepAlive: true }
-          }
-        ]
-      },
-      {
-        path: 'test',
-        name: 'Test',
-        redirect: '/test/test1',
-        meta: { title: '测试目录', icon: 'folder' },
-        children: [
-          {
-            path: 'test1',
-            name: 'Test1',
-            component: () => import('@/views/test/test1/index.vue'),
-            meta: {
-              title: '测试页面1',
-              requiresAuth: true,
-              roles: ['*'],
-            },
           },
           {
-            path: 'test2',
-            name: 'Test2',
-            component: () => import('@/views/test/test2/index.vue'),
-            meta: {
-              title: '测试页面2',
-              requiresAuth: true,
-              roles: ['*'],
-            },
+            path: 'job-log',
+            name: 'JobLog',
+            component: () => import('@/views/monitor/job/job-log.vue'),
+            meta: { title: '任务日志', icon: 'calendar-clock', keepAlive: true }
           }
         ]
       },
       {
         path: 'generator',
         name: 'Generator',
-        component: () => import('@/views/generator/index.vue'),
-        meta: {
-          title: '代码生成',
-          requiresAuth: true,
-          roles: ['admin'],
-        },
+        redirect: '/generator/index',
+        meta: { title: '代码生成器', icon: 'code' },
+        children: [
+          {
+            path: 'index',
+            name: 'GeneratorIndex',
+            component: () => import('@/views/generator/index.vue'),
+            meta: { title: '代码生成', icon: 'code', keepAlive: true }
+          },
+          {
+            path: 'config',
+            name: 'GeneratorConfig',
+            component: () => import('@/views/generator/config.vue'),
+            meta: { title: '生成配置', icon: 'setting', keepAlive: true, hidden: true }
+          }
+        ]
       }
+      // 测试目录和代码生成器已恢复
     ]
   },
   {
@@ -157,7 +154,7 @@ const router = createRouter({
 // 路由前置守卫
 router.beforeEach((to, from, next) => {
   // 设置页面标题
-  document.title = to.meta.title ? `${to.meta.title} - XHan Admin` : 'XHan Admin'
+  document.title = to.meta.title ? `${to.meta.title} - Lin Admin` : 'Lin Admin'
   
   // 简单的身份验证逻辑
   const token = localStorage.getItem('token')
@@ -169,4 +166,4 @@ router.beforeEach((to, from, next) => {
   }
 })
 
-export default router 
+export default router

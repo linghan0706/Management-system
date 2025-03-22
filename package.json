@@ -2,7 +2,7 @@
   "name": "xhan-admin",
   "version": "1.0.0",
   "private": true,
-  "description": "XHan Admin - 现代化的后台管理系统",
+  "description": "Lin Admin - 现代化的后台管理系统",
   "author": "XHan Team",
   "type": "module",
   "scripts": {

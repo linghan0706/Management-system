@@ -494,6 +494,21 @@ const handleMobileMenuItemClick = (key: string) => {
   handleMenuItemClick(key)
   drawerVisible.value = false
 }
+
+// 路由前置守卫
+router.beforeEach((to, from, next) => {
+  // 设置页面标题
+  document.title = to.meta.title ? `${to.meta.title} - Lin Admin` : 'Lin Admin'
+  
+  // 简单的身份验证逻辑
+  const token = localStorage.getItem('token')
+  
+  if (to.meta.requiresAuth !== false && !token) {
+    next('/login')
+  } else {
+    next()
+  }
+})
 </script>
 
 <template>
@@ -502,7 +517,8 @@ const handleMobileMenuItemClick = (key: string) => {
     <div v-if="!isMobile" class="sidebar" :class="{ 'sidebar-collapse': collapsed }">
       <div class="logo-container">
         <div class="logo">
-          <h1 v-if="!collapsed">XHan Admin</h1>
+          <img src="@/assets/logo.png" alt="Logo" />
+          <h1 v-if="!collapsed">Lin Admin</h1>
         </div>
       </div>
       <a-menu
@@ -526,6 +542,7 @@ const handleMobileMenuItemClick = (key: string) => {
             <a-menu-item 
               v-for="child in item.children" 
               :key="child.path.replace('/', '')"
+              @click="handleMobileMenuItemClick(child.path)"
             >
               <template #icon>
                 <component :is="getIconComponent(child.icon)" />
@@ -538,7 +555,7 @@ const handleMobileMenuItemClick = (key: string) => {
           <a-menu-item 
             v-else 
             :key="`item-${item.name}`"
-            @click="handleMenuItemClick(item.name)"
+            @click="handleMenuItemClick(item.path)"
           >
             <template #icon>
               <component :is="getIconComponent(item.icon)" />
@@ -562,7 +579,8 @@ const handleMobileMenuItemClick = (key: string) => {
     >
       <div class="logo-container">
         <div class="logo">
-          <h1>XHan Admin</h1>
+          <img v-if="false" src="@/assets/logo.png" alt="Logo" />
+          <h1>Lin Admin</h1>
         </div>
       </div>
       <a-menu
@@ -585,6 +603,7 @@ const handleMobileMenuItemClick = (key: string) => {
             <a-menu-item 
               v-for="child in item.children" 
               :key="child.path.replace('/', '')"
+              @click="handleMobileMenuItemClick(child.path)"
             >
               <template #icon>
                 <component :is="getIconComponent(child.icon)" />
@@ -597,7 +616,7 @@ const handleMobileMenuItemClick = (key: string) => {
           <a-menu-item 
             v-else 
             :key="`item-${item.name}`"
-            @click="handleMobileMenuItemClick(item.name)"
+            @click="handleMobileMenuItemClick(item.path)"
           >
             <template #icon>
               <component :is="getIconComponent(item.icon)" />
@@ -625,8 +644,8 @@ const handleMobileMenuItemClick = (key: string) => {
           
           <!-- Logo显示在移动端header中 -->
           <div v-if="isMobile" class="header-logo">
-            <img src="@/assets/xhan-logo.png" alt="Logo" />
-            <h1>XHan Admin</h1>
+            <img src="@/assets/logo.png" alt="Logo" />
+            <h1>Lin Admin</h1>
           </div>
         </div>
         
@@ -638,7 +657,8 @@ const handleMobileMenuItemClick = (key: string) => {
             @search="onSearch"
           >
             <template #prefix>
-              <icon-search />
+              <!-- 重复 -->
+              <!-- <icon-search /> -->
             </template>
           </a-input-search>
         </div>
@@ -768,12 +788,20 @@ $transition-duration: 0.3s;
         align-items: center;
         height: 32px;
         
+        img {
+          height: 40px;
+          width: 40px;
+          object-fit: contain;
+          transition: all $transition-duration;
+        }
+        
         h1 {
           color: #000;
           font-size: 18px;
           font-weight: 600;
           white-space: nowrap;
           margin: 0;
+          margin-left: 8px;
         }
       }
     }
@@ -836,14 +864,22 @@ $transition-duration: 0.3s;
       padding: 0 16px;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
+      justify-content: center;
       overflow: hidden;
       border-bottom: 1px solid var(--color-border);
       
       .logo {
         display: flex;
         align-items: center;
+        justify-content: center;
         height: 32px;
+        
+        img {
+          height: 40px;
+          width: 40px;
+          object-fit: contain;
+          transition: all $transition-duration;
+        }
         
         h1 {
           color: #000;
@@ -851,11 +887,14 @@ $transition-duration: 0.3s;
           font-weight: 600;
           white-space: nowrap;
           margin: 0;
+          margin-left: 8px;
         }
       }
     }
     
     :deep(.arco-menu) {
+      text-align: center;
+      
       .arco-menu-selected {
         background-color: rgba(var(--primary-6), 0.1);
         border-right: 3px solid rgb(var(--primary-6));
@@ -863,6 +902,7 @@ $transition-duration: 0.3s;
         .arco-menu-item-inner {
           font-weight: bold;
           color: rgb(var(--primary-6));
+          justify-content: center;
           
           .arco-icon {
             color: rgb(var(--primary-6));
@@ -871,22 +911,35 @@ $transition-duration: 0.3s;
       }
       
       .arco-menu-item {
+        text-align: center;
+        
         &:hover {
           background-color: rgba(var(--primary-6), 0.05);
+        }
+        
+        .arco-menu-item-inner {
+          justify-content: center;
         }
       }
       
       .arco-menu-inline-header {
+        text-align: center;
+        
         &.arco-menu-selected {
           background-color: transparent;
           .arco-menu-inline-header-title {
             color: rgb(var(--primary-6));
             font-weight: bold;
+            justify-content: center;
             
             .arco-icon {
               color: rgb(var(--primary-6));
             }
           }
+        }
+        
+        .arco-menu-inline-header-title {
+          justify-content: center;
         }
       }
     }
@@ -937,7 +990,9 @@ $transition-duration: 0.3s;
           align-items: center;
           
           img {
-            height: 28px;
+            height: 32px;
+            width: 32px;
+            object-fit: contain;
             margin-right: 8px;
           }
           
@@ -1024,6 +1079,10 @@ $transition-duration: 0.3s;
         flex: 1;
         
         .header-logo {
+          img {
+            height: 24px;
+            width: 24px;
+          }
           h1 {
             font-size: 14px;
           }
@@ -1050,4 +1109,4 @@ $transition-duration: 0.3s;
     }
   }
 }
-</style> 
+</style>

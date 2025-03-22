@@ -16,7 +16,7 @@ const goHome = () => {
   <div class="error-container">
     <div class="error-content">
       <div class="error-image">
-        <img src="@/assets/images/403.svg" alt="403" />
+        <img src="@/assets/images/erro.png" alt="403" />
       </div>
       <h1 class="error-title">403</h1>
       <p class="error-desc">抱歉，您没有权限访问此页面</p>

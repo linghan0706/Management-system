@@ -1,6 +1,9 @@
 <template>
   <div class="menu-list-container">
-    <!-- 菜单列表内容将在这里实现 -->
+    <a-card class="general-card">
+      <template #title>菜单管理</template>
+      <!-- 菜单管理内容将在这里实现 -->
+    </a-card>
   </div>
 </template>
 

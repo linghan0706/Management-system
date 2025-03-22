@@ -72,7 +72,7 @@ const handleSubmit = async () => {
       <div class="login-header">
         <div class="logo">
           <img src="../../assets/images/logo.svg" alt="logo" class="logo-img" />
-          <h1 class="logo-text">XHan Admin</h1>
+          <h1 class="logo-text">Lin Admin</h1>
         </div>
         <div class="welcome-text">欢迎回来，请登录</div>
       </div>
