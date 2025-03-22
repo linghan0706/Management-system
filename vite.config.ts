@@ -7,6 +7,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: '/',
   plugins: [
     vue(),
     vueDevTools(),
@@ -39,11 +40,7 @@ export default defineConfig({
       }
     },
     rollupOptions: {
-      external: [
-        '@arco-design/web-vue',
-        '@arco-design/web-vue/es/icon',
-        /^@arco-design\/web-vue\/es\/icon\/.*/
-      ],
+      external: ['@arco-design/web-vue', '@arco-design/web-vue/es/icon'],
       output: {
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
