@@ -15,7 +15,9 @@ import { IconTeam, IconApartment } from './components/icons'
 import './assets/styles/index.scss'
 
 // Mock数据
-import './mock'
+if (import.meta.env.DEV && !window.location.hostname.includes('netlify.app')) {
+  import('./mock')
+}
 
 console.log('应用初始化开始...')
 console.log('当前环境:', import.meta.env.MODE)
