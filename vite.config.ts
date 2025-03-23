@@ -10,8 +10,9 @@ export default defineConfig({
   base: '/',
   plugins: [
     vue(),
-    vueDevTools(),
-  ],
+    // 仅在开发环境使用devTools
+    process.env.NODE_ENV === 'development' ? vueDevTools() : null,
+  ].filter(Boolean),
   resolve: {
     alias: {
       '@': path.resolve(__dirname, 'src')
@@ -39,8 +40,15 @@ export default defineConfig({
         drop_debugger: false
       }
     },
+    // 减小构建体积，避免内存问题
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
+        manualChunks: {
+          'vendor': ['vue', 'vue-router', 'pinia'],
+          'arco': ['@arco-design/web-vue'],
+          'echarts': ['echarts', 'vue-echarts']
+        },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: 'assets/[ext]/[name]-[hash].[ext]'

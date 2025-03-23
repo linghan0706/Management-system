@@ -1,7 +1,7 @@
 # Netlify配置文件
 [build]
   # 构建命令
-  command = "npm run build"
+  command = "npm ci && npx vite build"
   # 发布目录
   publish = "dist"
 
@@ -35,8 +35,9 @@
 
 # 设置环境变量
 [build.environment]
-  NODE_VERSION = "18.0.0"  # 更改为项目推荐的Node版本
-  NPM_VERSION = "9.0.0"    # 更改为项目推荐的NPM版本
+  NODE_VERSION = "18.0.0"  # 项目推荐的Node版本
+  NPM_VERSION = "9.0.0"    # 项目推荐的NPM版本
+  NODE_OPTIONS = "--max-old-space-size=4096"  # 增加Node内存限制
 
 # 禁用构建优化，使用原始构建结果
 [build.processing]
