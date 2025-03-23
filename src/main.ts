@@ -18,6 +18,8 @@ import './assets/styles/index.scss'
 import './mock'
 
 console.log('应用初始化开始...')
+console.log('当前环境:', import.meta.env.MODE)
+console.log('当前URL:', window.location.href)
 
 // 检测是否在Netlify环境中
 const isNetlify = window.location.hostname.includes('netlify.app')
@@ -37,6 +39,22 @@ if (isNetlify && !localStorage.getItem('token')) {
 // 添加全局错误处理
 window.onerror = function(message, source, lineno, colno, error) {
   console.error('全局错误:', { message, source, lineno, colno, error })
+  
+  // 在页面上显示错误信息（仅在开发环境或Netlify环境）
+  if (import.meta.env.DEV || isNetlify) {
+    const errorElement = document.createElement('div')
+    errorElement.style.position = 'fixed'
+    errorElement.style.top = '0'
+    errorElement.style.left = '0'
+    errorElement.style.right = '0'
+    errorElement.style.padding = '10px'
+    errorElement.style.background = 'rgba(255, 0, 0, 0.7)'
+    errorElement.style.color = 'white'
+    errorElement.style.zIndex = '9999'
+    errorElement.textContent = `错误: ${message} (${source}:${lineno}:${colno})`
+    document.body.appendChild(errorElement)
+  }
+  
   return false
 }
 
@@ -60,10 +78,29 @@ app.component('IconApartment', IconApartment)
 
 // 全局错误处理
 app.config.errorHandler = (err, vm, info) => {
-  console.error('全局错误:', err)
+  console.error('Vue错误:', err)
   console.error('错误信息:', info)
+  
+  // 在页面上显示错误信息（仅在开发环境或Netlify环境）
+  if (import.meta.env.DEV || isNetlify) {
+    const errorElement = document.createElement('div')
+    errorElement.style.position = 'fixed'
+    errorElement.style.bottom = '0'
+    errorElement.style.left = '0'
+    errorElement.style.right = '0'
+    errorElement.style.padding = '10px'
+    errorElement.style.background = 'rgba(255, 0, 0, 0.7)'
+    errorElement.style.color = 'white'
+    errorElement.style.zIndex = '9999'
+    errorElement.textContent = `Vue错误: ${err}`
+    document.body.appendChild(errorElement)
+  }
 }
 
 console.log('挂载应用')
-app.mount('#app')
-console.log('应用挂载完成')
+try {
+  app.mount('#app')
+  console.log('应用挂载完成')
+} catch (error) {
+  console.error('应用挂载失败:', error)
+}
