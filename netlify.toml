@@ -1,7 +1,7 @@
 # Netlify配置文件
 [build]
   # 构建命令
-  command = "npm ci --force && npx vite build"
+  command = "npm ci --force && npm install -D vite@6.2.2 && npx vite build"
   # 发布目录
   publish = "dist"
 
